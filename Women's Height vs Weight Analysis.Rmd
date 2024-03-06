@@ -1,0 +1,86 @@
+---
+title: "Women's Height vs Weight Analysis"
+author: "Santiago Jaramillo"
+date: "2024-03-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r tidyverse, include=FALSE}
+install.packages("tidyverse")
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+## Description
+
+In the provided script, we explored the relationship between height and weight in American women using the women dataset. Initially, we visualized this relationship through a scatter plot, highlighting the general trend that taller women tend to weigh more. To quantitatively analyze this trend, we fitted a linear regression model, using height to predict weight. This model helped us understand how weight changes with height, quantified by the model's coefficients. We further tested the model's predictive power by estimating weights for a new set of heights, presenting both the original data and these predictions visually. This approach not only confirmed the model's effectiveness but also demonstrated the practical application of statistical modeling in understanding real-world relationships.
+
+```{r}
+# Load and view the initial part of the women dataset
+data(women)
+head(women)
+```
+
+```{r, echo=FALSE}
+# Initial scatter plot of women's height vs. weight
+ggplot(data = women, aes(x = height, y = weight)) +
+  geom_point(size = 3, alpha = .5) +
+  ggtitle("Women's Height vs Weight") +
+  xlab("Height (inches)") +
+  ylab("Weight (pounds)")
+```
+```{r}
+# linear model predicting weight based on height
+model1 <- lm(weight ~ height, data = women)
+```
+
+```{r}
+# View the summary of the linear model
+# The high R-squared value of 0.991 suggests that 99.1% of the variability in weight can be explained by height, indicating a very strong linear relationship between these two variables in the dataset.
+summary(model1)
+```
+```{r}
+# Define new data for which predictions are to be made
+new_data <- data.frame(height = c(68,70,72,71,63,65,67,57))
+```
+
+```{r}
+#Predict weights for the new heights using the fitted model
+predicted_weights <- predict(model1, new_data)
+```
+
+```{r}
+# Create a new data frame including both the new heights and their predicted weights
+new_data_with_predictions <- data.frame(
+  Height = new_data$height,
+  PredictedWeight = predicted_weights)
+```
+
+```{r}
+# Print the rounded predicted weights
+print(round(predicted_weights))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# Plot the original data and overlay predictions
+ggplot() +
+  geom_point(data = women, aes(x = height, y = weight), 
+             color = "blue", size = 3, alpha = .5, show.legend = TRUE, name = "Original Data") +
+  geom_point(data = new_data_with_predictions, aes(x = Height, y = PredictedWeight), 
+             color = "red", size = 3, alpha = .5, show.legend = TRUE, name = "Predictions") +
+  geom_smooth(data = women, aes(x = height, y = weight), method = "lm", se = FALSE, color = "darkblue") +
+  ggtitle("Women's Height vs Weight with Predictions") +
+  xlab("Height (inches)") +
+  ylab("Weight (pounds)") +
+  theme_minimal() +
+  scale_color_manual("", labels = c("Original Data", "Predictions"), 
+                     values = c("blue", "red"))
+
+```
+
